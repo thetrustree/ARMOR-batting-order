@@ -474,7 +474,11 @@
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
-    const STORAGE_KEY = "hvac-performance-batting-order-v2";
+    const STORAGE_KEY = "hvac-performance-batting-order-v3";
+    function makeId() {
+      if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+      return `tech-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    }
     const metricNames = [
       "Maintenance Plan Conversion",
       "Replacement Lead Conversion",
@@ -503,7 +507,7 @@
             ["Tomato", .22, .26, 875, 1, 2.8],
             ["Flash", .27, .39, 1210, 0, 2.2],
             ["Mega Mind", .24, .45, 1385, 2, 1.9]
-          ].map(([name, ...actuals]) => ({ id: crypto.randomUUID(), name, actuals }))
+          ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
         },
         maintenance: {
           label: "Maintenance",
@@ -521,7 +525,7 @@
             ["Tomato", .40, .15, 430, 1, 2.0],
             ["Flash", .31, .08, 495, 2, 1.9],
             ["Mega Mind", .26, .14, 560, 1, 1.7]
-          ].map(([name, ...actuals]) => ({ id: crypto.randomUUID(), name, actuals }))
+          ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
         }
       }
     };
@@ -842,7 +846,7 @@
     document.getElementById("addTech").addEventListener("click", () => {
       const name = prompt(`New ${team().label} technician name`);
       if (!name?.trim()) return;
-      const tech = { id: crypto.randomUUID(), name: name.trim(), actuals: team().metrics.map(() => 0) };
+      const tech = { id: makeId(), name: name.trim(), actuals: team().metrics.map(() => 0) };
       team().technicians.push(tech);
       openTech = tech.id;
       save(); render();
@@ -911,7 +915,7 @@
           const sourceIndex = metricIndexes[index];
           return sourceIndex >= 0 ? numericValue(row[sourceIndex], metric.type) : 0;
         });
-        targetTeam.technicians.push({ id: crypto.randomUUID(), name, actuals });
+        targetTeam.technicians.push({ id: makeId(), name, actuals });
         counts[destination] += 1;
       });
     }
