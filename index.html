@@ -7,9 +7,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="HVAC Batting Order">
-  <link rel="icon" href="assets/armor-touch-icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/armor-touch-icon.png">
-  <link rel="manifest" id="appManifest">
+  <link rel="icon" type="image/png" href="favicon.png?v=armor-2">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=armor-2">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=armor-2">
+  <link rel="manifest" href="manifest.webmanifest?v=armor-2">
   <title>HVAC Performance Batting Order</title>
   <style>
     :root {
@@ -1026,25 +1027,6 @@
         prompt("Copy this Team Link", field.value);
       }
     });
-
-    const shortcutIcon = document.querySelector('link[rel="apple-touch-icon"]')?.href;
-    if (shortcutIcon) {
-      const manifest = {
-        name: "Atlantic North HVAC Batting Order",
-        short_name: "HVAC Order",
-        start_url: "./",
-        display: "standalone",
-        background_color: "#dde2e7",
-        theme_color: "#080b10",
-        icons: [
-          { src: shortcutIcon, sizes: "180x180", type: "image/png", purpose: "any" },
-          { src: shortcutIcon, sizes: "180x180", type: "image/png", purpose: "maskable" }
-        ]
-      };
-      document.getElementById("appManifest").href = URL.createObjectURL(
-        new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" })
-      );
-    }
 
     render();
   </script>
