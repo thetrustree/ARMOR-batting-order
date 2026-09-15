@@ -104,6 +104,14 @@
 
     .hero-actions { display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
 
+    .customize-button {
+      align-self: flex-start;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: .72rem;
+      opacity: .78;
+    }
+
     .btn {
       border: 1px solid transparent;
       border-radius: 12px;
@@ -397,12 +405,104 @@
     }
     .share-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 13px; }
 
+    .editor-bar {
+      position: fixed;
+      z-index: 30;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px max(18px, calc((100% - 1180px) / 2));
+      color: white;
+      background: #080b10;
+      box-shadow: 0 -5px 22px rgba(8,11,16,.32);
+    }
+    .editor-bar[hidden] { display: none; }
+    .editor-message strong { display: block; }
+    .editor-message span { color: rgba(255,255,255,.68); font-size: .75rem; }
+    .editor-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .editor-actions button {
+      min-height: 37px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 8px;
+      color: white;
+      background: rgba(255,255,255,.08);
+      font-weight: 800;
+    }
+    .editor-actions .editor-primary { color: var(--navy); background: white; }
+    body.editing .app { padding-bottom: 150px; }
+    [data-editor-target] {
+      outline: 2px dashed rgba(217,224,231,.70);
+      outline-offset: 4px;
+      border-radius: 3px;
+      cursor: text;
+    }
+    [data-editor-target]:focus { outline: 3px solid var(--yellow); background: rgba(255,255,255,.96); color: var(--ink); }
+
+    .customizer {
+      position: fixed;
+      z-index: 40;
+      top: 18px;
+      right: 18px;
+      bottom: 78px;
+      width: min(520px, calc(100% - 36px));
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 24px 70px rgba(7,25,46,.34);
+    }
+    .customizer[hidden] { display: none; }
+    .customizer-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 17px;
+      color: white;
+      background: var(--navy);
+    }
+    .customizer-head h2 { margin: 0; color: white; font-size: 1.25rem; }
+    .customizer-head p { margin: 3px 0 0; color: rgba(255,255,255,.72); font-size: .78rem; }
+    .customizer-close { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.34); border-radius: 50%; color: white; background: transparent; font-size: 1.2rem; }
+    .customizer-body { padding: 17px; }
+    .customizer-section { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .customizer-section:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+    .customizer-section h3 { margin: 0 0 4px; color: var(--navy); }
+    .customizer-section .help { margin: 0 0 12px; color: var(--muted); font-size: .8rem; }
+    .custom-field { margin-bottom: 13px; }
+    .custom-field label { display: block; margin-bottom: 5px; color: var(--navy); font-size: .82rem; font-weight: 800; }
+    .custom-field input[type="text"], .custom-field input[type="file"] { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--cream); }
+    .custom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .palette-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .palette-field { display: grid; grid-template-columns: 46px 1fr; align-items: center; gap: 9px; }
+    .palette-field input { width: 46px; height: 42px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: white; cursor: pointer; }
+    .palette-field label { color: var(--navy); font-size: .8rem; font-weight: 800; line-height: 1.15; }
+    .palette-field label span { display: block; margin-top: 2px; color: var(--muted); font-size: .68rem; font-weight: 500; }
+    .customizer-foot {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 13px 17px;
+      border-top: 1px solid var(--line);
+      background: white;
+    }
+
     @media (max-width: 760px) {
       .app { width: min(100% - 18px, 1180px); padding-top: 9px; }
       .hero { align-items: flex-start; flex-direction: column; padding: 21px; border-radius: 18px; }
       .brand { align-items: flex-start; gap: 13px; }
       .brand-logo { width: 86px; height: 86px; }
       .hero-actions { justify-content: flex-start; }
+      .customize-button { order: 10; }
       .summary { grid-template-columns: 1fr; gap: 8px; }
       .summary-card { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; }
       .summary-card .value { margin: 0; font-size: 1.12rem; }
@@ -413,6 +513,9 @@
       .metric-grid { grid-template-columns: 1.4fr .75fr .75fr; }
       .metric-grid .attain { display: none; }
       .settings-grid { grid-template-columns: 1.4fr .8fr .8fr; }
+      .editor-bar { display: block; }
+      .editor-actions { justify-content: flex-start; margin-top: 10px; }
+      .custom-grid, .palette-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -420,8 +523,8 @@
   <main class="app">
     <section class="hero">
       <div class="brand">
-        <img class="brand-logo" src="armor-hvac-logo.png" alt="Atlantic North HVAC Performance">
-        <div>
+        <img class="brand-logo" id="brandLogo" src="armor-hvac-logo.png" alt="Atlantic North HVAC Performance">
+        <div class="brand-copy">
           <p class="eyebrow">Atlantic North · Batting Order</p>
           <h1>HVAC Performance Batting Order</h1>
           <p>Turn HVAC performance into a clear, coachable lineup.</p>
@@ -431,6 +534,7 @@
         <button class="btn ghost" id="copyLink">Copy Team Link</button>
         <button class="btn ghost" id="importTechs">Import Tech List</button>
         <button class="btn primary" id="addTech">+ Add Technician</button>
+        <button class="btn ghost customize-button" id="editToggle" type="button" aria-pressed="false">Customize tool</button>
         <input id="techFile" type="file" accept=".xlsx,.xls,.csv" hidden>
       </div>
     </section>
@@ -471,9 +575,146 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <aside class="editor-bar" id="editorBar" aria-label="Batting order editing controls" hidden>
+    <div class="editor-message" role="status" aria-live="polite">
+      <strong id="editorStatus">Editing is on</strong>
+      <span>Click outlined wording to edit it. Logo, colors, and labels are under Market settings.</span>
+    </div>
+    <div class="editor-actions">
+      <button id="openCustomizer" type="button">Market settings</button>
+      <button id="saveCustomization" type="button">Save draft here</button>
+      <button id="downloadCustomized" class="editor-primary" type="button">Download customized file</button>
+      <button id="restoreCustomization" type="button">Restore design</button>
+      <button id="finishEditing" type="button">Finish</button>
+    </div>
+  </aside>
+
+  <aside class="customizer" id="customizer" aria-label="Market settings" hidden>
+    <div class="customizer-head">
+      <div><h2>Market settings</h2><p>Change the logo, colors, team names, and summary labels.</p></div>
+      <button class="customizer-close" id="closeCustomizer" type="button" aria-label="Close market settings">×</button>
+    </div>
+    <div class="customizer-body">
+      <section class="customizer-section">
+        <h3>Market logo</h3>
+        <p class="help">Use a PNG, JPG, GIF, WebP, or SVG file up to 2 MB. The logo is embedded in downloaded copies.</p>
+        <div class="custom-field"><label for="logoFile">Choose logo file</label><input id="logoFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"></div>
+        <div class="custom-field"><label for="logoAlt">Logo description</label><input id="logoAlt" type="text" maxlength="100" value="Atlantic North HVAC Performance"></div>
+        <button class="btn soft small" id="removeLogo" type="button">Use original ARMOR logo</button>
+      </section>
+
+      <section class="customizer-section">
+        <h3>Market color scheme</h3>
+        <p class="help">Color changes appear immediately.</p>
+        <div class="palette-grid">
+          <div class="palette-field"><input id="colorNavy" type="color" data-color-var="--navy"><label for="colorNavy">Primary dark<span>Headings and controls</span></label></div>
+          <div class="palette-field"><input id="colorNavy2" type="color" data-color-var="--navy-2"><label for="colorNavy2">Secondary dark<span>Header gradient</span></label></div>
+          <div class="palette-field"><input id="colorOrange" type="color" data-color-var="--orange"><label for="colorOrange">Market accent<span>Primary actions</span></label></div>
+          <div class="palette-field"><input id="colorAqua" type="color" data-color-var="--aqua"><label for="colorAqua">Light accent<span>Settings and panels</span></label></div>
+          <div class="palette-field"><input id="colorCream" type="color" data-color-var="--cream"><label for="colorCream">Input background<span>Editable values</span></label></div>
+          <div class="palette-field"><input id="colorSteel" type="color" data-color-var="--steel"><label for="colorSteel">Score accent<span>Meters and details</span></label></div>
+        </div>
+        <button class="btn soft small" id="resetPalette" type="button" style="margin-top:12px">Reset colors</button>
+      </section>
+
+      <section class="customizer-section">
+        <h3>Display labels</h3>
+        <div class="custom-grid">
+          <div class="custom-field"><label for="serviceLabel">Service board name</label><input id="serviceLabel" type="text" maxlength="60"></div>
+          <div class="custom-field"><label for="maintenanceLabel">Maintenance board name</label><input id="maintenanceLabel" type="text" maxlength="60"></div>
+          <div class="custom-field"><label for="topLabel">Top performer label</label><input id="topLabel" type="text" maxlength="60"></div>
+          <div class="custom-field"><label for="averageLabel">Team average label</label><input id="averageLabel" type="text" maxlength="60"></div>
+          <div class="custom-field"><label for="windowLabel">Performance window label</label><input id="windowLabel" type="text" maxlength="60"></div>
+        </div>
+      </section>
+    </div>
+    <div class="customizer-foot">
+      <button class="btn soft small" id="resetLabels" type="button">Reset labels</button>
+      <button class="btn primary small" id="applyMarketSettings" type="button">Apply settings</button>
+    </div>
+  </aside>
+
+  <script id="embeddedCustomization" type="application/json">null</script>
+  <script id="embeddedCopy" type="application/json">null</script>
+  <script id="embeddedState" type="application/json">null</script>
+
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
     const STORAGE_KEY = "hvac-performance-batting-order-v3";
+    const CUSTOMIZATION_KEY = "hvac-performance-batting-order-customization-v1";
+    const COPY_KEY = "hvac-performance-batting-order-copy-v1";
+    const clone = value => JSON.parse(JSON.stringify(value));
+    const DEFAULT_CUSTOMIZATION = {
+      palette: {
+        "--navy": "#080b10",
+        "--navy-2": "#1a2230",
+        "--orange": "#8f1f2d",
+        "--aqua": "#eef2f5",
+        "--cream": "#f4f5f6",
+        "--steel": "#47515f"
+      },
+      logoData: "",
+      logoAlt: "Atlantic North HVAC Performance",
+      topLabel: "Top Performer",
+      averageLabel: "Team Average",
+      windowLabel: "Performance Window"
+    };
+
+    function embeddedJson(id, fallback = null) {
+      try {
+        return JSON.parse(document.getElementById(id)?.textContent || "null") || fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    function loadCustomization() {
+      const embedded = embeddedJson("embeddedCustomization", {});
+      try {
+        return { ...clone(DEFAULT_CUSTOMIZATION), ...embedded, ...JSON.parse(localStorage.getItem(CUSTOMIZATION_KEY) || "null") };
+      } catch (_) {
+        return { ...clone(DEFAULT_CUSTOMIZATION), ...embedded };
+      }
+    }
+
+    let customization = loadCustomization();
+
+    function applyPalette(palette = customization.palette) {
+      Object.entries(palette || {}).forEach(([name, value]) => {
+        if (/^#[0-9a-f]{6}$/i.test(value)) document.documentElement.style.setProperty(name, value);
+      });
+    }
+
+    const originalLogoSrc = "armor-hvac-logo.png";
+    function renderLogo() {
+      const logo = document.getElementById("brandLogo");
+      logo.src = customization.logoData || originalLogoSrc;
+      logo.alt = customization.logoAlt || DEFAULT_CUSTOMIZATION.logoAlt;
+      document.getElementById("logoAlt").value = logo.alt;
+    }
+
+    const editableSelector = [
+      ".hero .eyebrow", ".hero h1", ".hero .brand-copy > p:last-child",
+      ".panel-head > div > p", ".share-card h2", ".share-card > p"
+    ].join(",");
+    const copyTargets = [...document.querySelectorAll(editableSelector)];
+    const baseCopy = copyTargets.map(element => element.innerHTML);
+    const embeddedCopy = embeddedJson("embeddedCopy", null);
+    function applyCopy(copy) {
+      if (!Array.isArray(copy)) return;
+      copyTargets.forEach((element, index) => {
+        if (typeof copy[index] === "string") element.innerHTML = copy[index];
+      });
+    }
+    try {
+      applyCopy(JSON.parse(localStorage.getItem(COPY_KEY) || "null") || embeddedCopy);
+    } catch (_) {
+      applyCopy(embeddedCopy);
+    }
+    const originalCopy = embeddedCopy || [...baseCopy];
+    applyPalette();
+    renderLogo();
+
     function makeId() {
       if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
       return `tech-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -529,7 +770,6 @@
       }
     };
 
-    const clone = value => JSON.parse(JSON.stringify(value));
     let state = loadState();
     let settingsOpen = false;
     let openTech = null;
@@ -546,7 +786,7 @@
         } catch (_) {}
       }
       try {
-        return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)) || clone(defaults));
+        return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)) || embeddedJson("embeddedState", null) || clone(defaults));
       } catch (_) {
         return clone(defaults);
       }
@@ -629,6 +869,7 @@
     function render() {
       document.querySelectorAll("[data-team]").forEach(button => {
         button.setAttribute("aria-selected", button.dataset.team === state.activeTeam ? "true" : "false");
+        button.textContent = `${state.teams[button.dataset.team].label} Batting Order`;
       });
       document.getElementById("panelTitle").textContent = `${team().label} Leaderboard`;
       renderSummary();
@@ -645,9 +886,9 @@
       const techs = sortedTechs();
       const avg = techs.length ? techs.reduce((sum, tech) => sum + tech.result.score, 0) / techs.length : 0;
       document.getElementById("summary").innerHTML = `
-        <article class="summary-card"><span class="label">Top Performer</span><span class="value">${escapeHtml(techs[0]?.name || "—")}</span></article>
-        <article class="summary-card"><span class="label">Team Average</span><span class="value">${percent(avg)}</span></article>
-        <article class="summary-card"><span class="label">Performance Window</span><span class="value">${trackingWindow()}</span></article>`;
+        <article class="summary-card"><span class="label">${escapeHtml(customization.topLabel)}</span><span class="value">${escapeHtml(techs[0]?.name || "—")}</span></article>
+        <article class="summary-card"><span class="label">${escapeHtml(customization.averageLabel)}</span><span class="value">${percent(avg)}</span></article>
+        <article class="summary-card"><span class="label">${escapeHtml(customization.windowLabel)}</span><span class="value">${trackingWindow()}</span></article>`;
     }
 
     function renderWarning() {
@@ -1024,6 +1265,214 @@
       } else {
         prompt("Copy this Team Link", field.value);
       }
+    });
+
+    const editorBar = document.getElementById("editorBar");
+    const editorStatus = document.getElementById("editorStatus");
+    const customizer = document.getElementById("customizer");
+    const paletteInputs = [...document.querySelectorAll("[data-color-var]")];
+    let editing = false;
+    let customizationDirty = false;
+
+    function setEditorStatus(message) {
+      editorStatus.textContent = message;
+    }
+
+    function markCustomizationDirty(message = "Unsaved customization") {
+      customizationDirty = true;
+      setEditorStatus(message);
+      document.getElementById("editToggle").textContent = editing ? "Finish editing" : "Customize tool · unsaved";
+    }
+
+    function syncMarketSettings() {
+      paletteInputs.forEach(input => {
+        input.value = customization.palette?.[input.dataset.colorVar] || DEFAULT_CUSTOMIZATION.palette[input.dataset.colorVar];
+      });
+      document.getElementById("serviceLabel").value = state.teams.service.label;
+      document.getElementById("maintenanceLabel").value = state.teams.maintenance.label;
+      document.getElementById("topLabel").value = customization.topLabel;
+      document.getElementById("averageLabel").value = customization.averageLabel;
+      document.getElementById("windowLabel").value = customization.windowLabel;
+      document.getElementById("logoAlt").value = customization.logoAlt;
+    }
+
+    function setEditing(enabled) {
+      editing = enabled;
+      document.body.classList.toggle("editing", enabled);
+      editorBar.hidden = !enabled;
+      document.getElementById("editToggle").setAttribute("aria-pressed", String(enabled));
+      document.getElementById("editToggle").textContent = enabled ? "Finish editing" : (customizationDirty ? "Customize tool · unsaved" : "Customize tool");
+      copyTargets.forEach(element => {
+        if (enabled) {
+          element.setAttribute("contenteditable", "true");
+          element.setAttribute("spellcheck", "true");
+          element.setAttribute("data-editor-target", "");
+        } else {
+          element.removeAttribute("contenteditable");
+          element.removeAttribute("spellcheck");
+          element.removeAttribute("data-editor-target");
+        }
+      });
+      if (enabled) {
+        syncMarketSettings();
+        setEditorStatus("Editing is on");
+      } else {
+        customizer.hidden = true;
+      }
+    }
+
+    function applyMarketSettings() {
+      const serviceLabel = document.getElementById("serviceLabel").value.trim();
+      const maintenanceLabel = document.getElementById("maintenanceLabel").value.trim();
+      const topLabel = document.getElementById("topLabel").value.trim();
+      const averageLabel = document.getElementById("averageLabel").value.trim();
+      const windowLabel = document.getElementById("windowLabel").value.trim();
+      if (!serviceLabel || !maintenanceLabel || !topLabel || !averageLabel || !windowLabel) {
+        alert("Every display label needs a value.");
+        return;
+      }
+      state.teams.service.label = serviceLabel;
+      state.teams.maintenance.label = maintenanceLabel;
+      customization.topLabel = topLabel;
+      customization.averageLabel = averageLabel;
+      customization.windowLabel = windowLabel;
+      customization.logoAlt = document.getElementById("logoAlt").value.trim() || DEFAULT_CUSTOMIZATION.logoAlt;
+      save();
+      renderLogo();
+      render();
+      customizer.hidden = true;
+      markCustomizationDirty("Market settings applied · save or download to keep them");
+    }
+
+    function saveCustomization() {
+      try {
+        localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(customization));
+        localStorage.setItem(COPY_KEY, JSON.stringify(copyTargets.map(element => element.innerHTML)));
+        save();
+        customizationDirty = false;
+        setEditorStatus("Customization saved in this browser");
+      } catch (_) {
+        setEditorStatus("Browser saving is unavailable · download the customized file instead");
+      }
+    }
+
+    function customizedDocument() {
+      document.getElementById("embeddedCustomization").textContent = JSON.stringify(customization).replaceAll("<", "\\u003c");
+      document.getElementById("embeddedCopy").textContent = JSON.stringify(copyTargets.map(element => element.innerHTML)).replaceAll("<", "\\u003c");
+      document.getElementById("embeddedState").textContent = JSON.stringify(state).replaceAll("<", "\\u003c");
+      const documentClone = document.documentElement.cloneNode(true);
+      documentClone.querySelector("body").classList.remove("editing");
+      documentClone.querySelector("#editorBar").setAttribute("hidden", "");
+      documentClone.querySelector("#customizer").setAttribute("hidden", "");
+      const toggle = documentClone.querySelector("#editToggle");
+      toggle.setAttribute("aria-pressed", "false");
+      toggle.textContent = "Customize tool";
+      documentClone.querySelectorAll("[data-editor-target], [contenteditable], [spellcheck]").forEach(element => {
+        element.removeAttribute("data-editor-target");
+        element.removeAttribute("contenteditable");
+        element.removeAttribute("spellcheck");
+      });
+      return "<!doctype html>\n" + documentClone.outerHTML;
+    }
+
+    function downloadCustomizedFile() {
+      saveCustomization();
+      const file = new Blob([customizedDocument()], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ARMOR-Batting-Order-Customized.html";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      customizationDirty = false;
+      setEditorStatus("Customized batting-order file downloaded");
+    }
+
+    function restoreCustomization() {
+      if (!confirm("Restore the original ARMOR logo, colors, labels, and wording? Technician results will remain.")) return;
+      customization = clone(DEFAULT_CUSTOMIZATION);
+      state.teams.service.label = "Service";
+      state.teams.maintenance.label = "Maintenance";
+      applyCopy(originalCopy);
+      applyPalette();
+      renderLogo();
+      try {
+        localStorage.removeItem(CUSTOMIZATION_KEY);
+        localStorage.removeItem(COPY_KEY);
+      } catch (_) {}
+      save();
+      render();
+      syncMarketSettings();
+      customizationDirty = false;
+      setEditorStatus("Original ARMOR design restored");
+    }
+
+    document.getElementById("editToggle").addEventListener("click", () => setEditing(!editing));
+    document.getElementById("finishEditing").addEventListener("click", () => setEditing(false));
+    document.getElementById("openCustomizer").addEventListener("click", () => {
+      syncMarketSettings();
+      customizer.hidden = false;
+    });
+    document.getElementById("closeCustomizer").addEventListener("click", () => { customizer.hidden = true; });
+    document.getElementById("applyMarketSettings").addEventListener("click", applyMarketSettings);
+    document.getElementById("saveCustomization").addEventListener("click", saveCustomization);
+    document.getElementById("downloadCustomized").addEventListener("click", downloadCustomizedFile);
+    document.getElementById("restoreCustomization").addEventListener("click", restoreCustomization);
+    document.getElementById("resetLabels").addEventListener("click", () => {
+      document.getElementById("serviceLabel").value = "Service";
+      document.getElementById("maintenanceLabel").value = "Maintenance";
+      document.getElementById("topLabel").value = DEFAULT_CUSTOMIZATION.topLabel;
+      document.getElementById("averageLabel").value = DEFAULT_CUSTOMIZATION.averageLabel;
+      document.getElementById("windowLabel").value = DEFAULT_CUSTOMIZATION.windowLabel;
+      setEditorStatus("Original labels loaded · select Apply settings to use them");
+    });
+    paletteInputs.forEach(input => input.addEventListener("input", () => {
+      customization.palette = { ...customization.palette, [input.dataset.colorVar]: input.value };
+      applyPalette();
+      markCustomizationDirty("Unsaved color changes");
+    }));
+    document.getElementById("resetPalette").addEventListener("click", () => {
+      customization.palette = clone(DEFAULT_CUSTOMIZATION.palette);
+      applyPalette();
+      syncMarketSettings();
+      markCustomizationDirty("Original colors restored · save or download to keep them");
+    });
+    document.getElementById("logoAlt").addEventListener("input", event => {
+      customization.logoAlt = event.target.value.trim() || DEFAULT_CUSTOMIZATION.logoAlt;
+      renderLogo();
+      markCustomizationDirty("Unsaved logo changes");
+    });
+    document.getElementById("logoFile").addEventListener("change", event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        event.target.value = "";
+        alert("Choose a logo file smaller than 2 MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        customization.logoData = reader.result;
+        renderLogo();
+        markCustomizationDirty("Logo added · save or download to keep it");
+      });
+      reader.readAsDataURL(file);
+    });
+    document.getElementById("removeLogo").addEventListener("click", () => {
+      customization.logoData = "";
+      document.getElementById("logoFile").value = "";
+      renderLogo();
+      markCustomizationDirty("Original ARMOR logo restored");
+    });
+    copyTargets.forEach(element => element.addEventListener("input", () => {
+      if (editing) markCustomizationDirty("Unsaved wording changes");
+    }));
+    window.addEventListener("beforeunload", event => {
+      if (!customizationDirty) return;
+      event.preventDefault();
+      event.returnValue = "";
     });
 
     render();
