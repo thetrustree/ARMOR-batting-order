@@ -36,8 +36,8 @@
       min-width: 320px;
       color: var(--ink);
       background:
-        radial-gradient(circle at 12% 0%, rgba(143, 31, 45, .16), transparent 30rem),
-        radial-gradient(circle at 88% 10%, rgba(71, 81, 95, .18), transparent 28rem),
+        radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--orange) 16%, transparent), transparent 30rem),
+        radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--steel) 18%, transparent), transparent 28rem),
         linear-gradient(180deg, #f7f8f9 0, #eceff2 45%, #dde2e7 100%);
       font: 16px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
@@ -61,7 +61,7 @@
       border-radius: 24px;
       background:
         linear-gradient(110deg, rgba(255,255,255,.09), transparent 36%),
-        linear-gradient(135deg, #050609 0%, #171c24 52%, #52131d 100%);
+        linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 58%, var(--orange) 100%);
       border: 1px solid rgba(210, 216, 222, .22);
       box-shadow: var(--shadow);
     }
@@ -123,13 +123,13 @@
     }
 
     .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(8, 27, 44, .16); }
-    .btn.primary { background: var(--orange); color: white; border-color: #b94351; }
+    .btn.primary { background: var(--orange); color: white; border-color: var(--orange); }
     #addTech {
       color: white;
-      background: linear-gradient(180deg, #b02f3e, #781925);
-      border-color: #c45260;
+      background: linear-gradient(180deg, var(--orange), var(--navy));
+      border-color: var(--orange);
     }
-    #addTech:hover { background: linear-gradient(180deg, #bf3a49, #8f1f2d); }
+    #addTech:hover { filter: brightness(1.12); }
     .btn.soft { background: var(--aqua); color: var(--navy); border-color: var(--aqua-2); }
     .btn.ghost { background: transparent; color: white; border-color: rgba(255,255,255,.35); }
     .btn.danger { color: var(--red); border-color: #ecc5bf; background: #fff8f7; }
@@ -160,7 +160,7 @@
 
     .switcher button[aria-selected="true"] {
       color: white;
-      background: linear-gradient(135deg, #080b10, #323b47);
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
       box-shadow: 0 5px 12px rgba(23, 28, 36, .24);
     }
 
@@ -585,11 +585,11 @@
   <aside class="editor-bar" id="editorBar" aria-label="Batting order editing controls" hidden>
     <div class="editor-message" role="status" aria-live="polite">
       <strong id="editorStatus">Editing is on</strong>
-      <span>Click outlined wording to edit it. Logo, colors, and labels are under Market settings.</span>
+      <span>Click outlined wording to edit it. Logo, colors, labels, and team data save automatically in this browser.</span>
     </div>
     <div class="editor-actions">
       <button id="openCustomizer" type="button">Market settings</button>
-      <button id="saveCustomization" type="button">Save draft here</button>
+      <button id="saveCustomization" type="button">Save now</button>
       <button id="downloadCustomized" class="editor-primary" type="button">Download customized file</button>
       <button id="restoreCustomization" type="button">Restore design</button>
       <button id="finishEditing" type="button">Finish</button>
@@ -604,7 +604,7 @@
     <div class="customizer-body">
       <section class="customizer-section">
         <h3>Market logo</h3>
-        <p class="help">Use a PNG, JPG, GIF, WebP, or SVG file up to 2 MB. The logo is embedded in downloaded copies.</p>
+        <p class="help">Use a PNG, JPG, GIF, WebP, or SVG file up to 2 MB. Changes save automatically here, and the logo is embedded in downloaded copies.</p>
         <div class="custom-field"><label for="logoFile">Choose logo file</label><input id="logoFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"></div>
         <div class="custom-field"><label for="logoAlt">Logo description</label><input id="logoAlt" type="text" maxlength="100" value="Atlantic North HVAC Performance"></div>
         <button class="btn soft small" id="removeLogo" type="button">Use original ARMOR logo</button>
@@ -688,6 +688,8 @@
       Object.entries(palette || {}).forEach(([name, value]) => {
         if (/^#[0-9a-f]{6}$/i.test(value)) document.documentElement.style.setProperty(name, value);
       });
+      const themeColor = palette?.["--navy"] || DEFAULT_CUSTOMIZATION.palette["--navy"];
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor);
     }
 
     const originalLogoSrc = "armor-hvac-logo.png";
@@ -733,7 +735,7 @@
     ];
 
     const defaults = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       activeTeam: "selling",
       teamOrder: ["selling", "service", "maintenance", "comfort-advisor"],
       windowDays: 14,
@@ -747,7 +749,18 @@
             { name: metricNames[3], target: 1, weight: 0.20, type: "number" },
             { name: metricNames[4], target: 2.5, weight: 0.20, type: "decimal" }
           ],
-          technicians: []
+          technicians: [
+            ["Ace", .29, .38, 1120, 2, 2.8],
+            ["Atlas", .24, .42, 1040, 1, 3.1],
+            ["Compass", .21, .31, 890, 1, 2.3],
+            ["Copper", .27, .36, 995, 2, 2.6],
+            ["Heatwave", .33, .29, 1280, 3, 2.2],
+            ["North Star", .19, .40, 1085, 1, 2.9],
+            ["Ranger", .26, .34, 940, 2, 2.4],
+            ["Scout", .23, .37, 1015, 1, 2.7],
+            ["Summit", .31, .44, 1360, 2, 3.3],
+            ["Torch", .28, .33, 1175, 2, 2.5]
+          ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
         },
         service: {
           label: "Service",
@@ -764,7 +777,11 @@
             ["Bad Bunny", .12, .41, 760, 0, 1.7],
             ["Tomato", .22, .26, 875, 1, 2.8],
             ["Flash", .27, .39, 1210, 0, 2.2],
-            ["Mega Mind", .24, .45, 1385, 2, 1.9]
+            ["Mega Mind", .24, .45, 1385, 2, 1.9],
+            ["Blue Flame", .29, .36, 1095, 2, 2.6],
+            ["High Gear", .20, .33, 925, 1, 2.3],
+            ["Icebreaker", .25, .38, 1045, 2, 2.7],
+            ["Roadrunner", .32, .30, 1180, 1, 2.4]
           ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
         },
         maintenance: {
@@ -782,7 +799,11 @@
             ["Bad Bunny", .22, .18, 610, 2, 1.5],
             ["Tomato", .40, .15, 430, 1, 2.0],
             ["Flash", .31, .08, 495, 2, 1.9],
-            ["Mega Mind", .26, .14, 560, 1, 1.7]
+            ["Mega Mind", .26, .14, 560, 1, 1.7],
+            ["Airflow", .43, .17, 485, 2, 2.2],
+            ["Clean Coil", .38, .11, 455, 1, 2.4],
+            ["Filter King", .47, .19, 535, 2, 2.1],
+            ["Tune-Up", .36, .16, 510, 1, 1.9]
           ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
         },
         "comfort-advisor": {
@@ -794,7 +815,18 @@
             { name: "Gross Margin", target: 0.45, weight: 0.20, type: "percent" },
             { name: "5-Star Google Reviews", target: 1, weight: 0.10, type: "number" }
           ],
-          technicians: []
+          technicians: [
+            ["Closer", .52, 14250, .78, .48, 2],
+            ["Navigator", .47, 13100, .72, .46, 1],
+            ["Blueprint", .41, 11850, .69, .43, 1],
+            ["Handshake", .55, 12750, .76, .47, 2],
+            ["Home Run", .49, 15600, .74, .50, 1],
+            ["Pathfinder", .44, 12100, .67, .45, 2],
+            ["Rainmaker", .58, 14900, .81, .49, 2],
+            ["Solution Pro", .46, 13450, .70, .44, 1],
+            ["Trust Builder", .51, 13950, .79, .46, 3],
+            ["Vision", .43, 11600, .73, .42, 1]
+          ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
         }
       }
     };
@@ -838,6 +870,22 @@
         });
         data.schemaVersion = 3;
       }
+      if (Number(data.schemaVersion) < 4) {
+        ["selling", "service", "maintenance", "comfort-advisor"].forEach(id => {
+          const current = data.teams[id];
+          if (!current) return;
+          current.metrics = metricsWithFiveExamples(current.metrics);
+          current.technicians = Array.isArray(current.technicians) ? current.technicians : [];
+          const existingNames = new Set(current.technicians.map(tech => String(tech.name || "").toLowerCase()));
+          for (const example of defaults.teams[id].technicians) {
+            if (current.technicians.length >= 10) break;
+            if (existingNames.has(example.name.toLowerCase())) continue;
+            current.technicians.push({ ...clone(example), id: makeId() });
+            existingNames.add(example.name.toLowerCase());
+          }
+        });
+        data.schemaVersion = 4;
+      }
       const teamIds = Object.keys(data.teams);
       if (!teamIds.length) return clone(defaults);
       const requestedOrder = Array.isArray(data.teamOrder) ? data.teamOrder : teamIds;
@@ -869,7 +917,13 @@
     }
 
     function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        return true;
+      } catch (_) {
+        notify("This browser could not save the team data. Download a customized file to keep a backup.");
+        return false;
+      }
     }
 
     function team() { return state.teams[state.activeTeam]; }
@@ -1400,15 +1454,18 @@
     const paletteInputs = [...document.querySelectorAll("[data-color-var]")];
     let editing = false;
     let customizationDirty = false;
+    let customizationSaveTimer = null;
 
     function setEditorStatus(message) {
       editorStatus.textContent = message;
     }
 
-    function markCustomizationDirty(message = "Unsaved customization") {
+    function markCustomizationDirty(message = "Saving customization") {
       customizationDirty = true;
-      setEditorStatus(message);
-      document.getElementById("editToggle").textContent = editing ? "Finish editing" : "Customize tool · unsaved";
+      setEditorStatus(`${message} · saving automatically`);
+      document.getElementById("editToggle").textContent = editing ? "Finish editing" : "Customize tool · saving";
+      clearTimeout(customizationSaveTimer);
+      customizationSaveTimer = setTimeout(() => saveCustomization(), 250);
     }
 
     function syncMarketSettings() {
@@ -1440,8 +1497,9 @@
       });
       if (enabled) {
         syncMarketSettings();
-        setEditorStatus("Editing is on");
+        setEditorStatus("Editing is on · changes save automatically");
       } else {
+        if (customizationDirty) saveCustomization();
         customizer.hidden = true;
       }
     }
@@ -1462,18 +1520,23 @@
       renderLogo();
       render();
       customizer.hidden = true;
-      markCustomizationDirty("Market settings applied · save or download to keep them");
+      markCustomizationDirty("Market settings applied");
     }
 
     function saveCustomization() {
+      clearTimeout(customizationSaveTimer);
+      customizationSaveTimer = null;
       try {
         localStorage.setItem(CUSTOMIZATION_KEY, JSON.stringify(customization));
         localStorage.setItem(COPY_KEY, JSON.stringify(copyTargets.map(element => element.innerHTML)));
-        save();
+        if (!save()) throw new Error("team data save failed");
         customizationDirty = false;
-        setEditorStatus("Customization saved in this browser");
+        setEditorStatus("All changes saved automatically in this browser");
+        document.getElementById("editToggle").textContent = editing ? "Finish editing" : "Customize tool";
+        return true;
       } catch (_) {
         setEditorStatus("Browser saving is unavailable · download the customized file instead");
+        return false;
       }
     }
 
@@ -1543,23 +1606,23 @@
       document.getElementById("topLabel").value = DEFAULT_CUSTOMIZATION.topLabel;
       document.getElementById("averageLabel").value = DEFAULT_CUSTOMIZATION.averageLabel;
       document.getElementById("windowLabel").value = DEFAULT_CUSTOMIZATION.windowLabel;
-      setEditorStatus("Original labels loaded · select Apply settings to use them");
+      setEditorStatus("Original labels loaded · select Apply settings to save them");
     });
     paletteInputs.forEach(input => input.addEventListener("input", () => {
       customization.palette = { ...customization.palette, [input.dataset.colorVar]: input.value };
       applyPalette();
-      markCustomizationDirty("Unsaved color changes");
+      markCustomizationDirty("Color changes applied");
     }));
     document.getElementById("resetPalette").addEventListener("click", () => {
       customization.palette = clone(DEFAULT_CUSTOMIZATION.palette);
       applyPalette();
       syncMarketSettings();
-      markCustomizationDirty("Original colors restored · save or download to keep them");
+      markCustomizationDirty("Original colors restored");
     });
     document.getElementById("logoAlt").addEventListener("input", event => {
       customization.logoAlt = event.target.value.trim() || DEFAULT_CUSTOMIZATION.logoAlt;
       renderLogo();
-      markCustomizationDirty("Unsaved logo changes");
+      markCustomizationDirty("Logo description updated");
     });
     document.getElementById("logoFile").addEventListener("change", event => {
       const file = event.target.files?.[0];
@@ -1573,7 +1636,7 @@
       reader.addEventListener("load", () => {
         customization.logoData = reader.result;
         renderLogo();
-        markCustomizationDirty("Logo added · save or download to keep it");
+        markCustomizationDirty("Logo added");
       });
       reader.readAsDataURL(file);
     });
@@ -1584,7 +1647,7 @@
       markCustomizationDirty("Original ARMOR logo restored");
     });
     copyTargets.forEach(element => element.addEventListener("input", () => {
-      if (editing) markCustomizationDirty("Unsaved wording changes");
+      if (editing) markCustomizationDirty("Wording updated");
     }));
     window.addEventListener("beforeunload", event => {
       if (!customizationDirty) return;
