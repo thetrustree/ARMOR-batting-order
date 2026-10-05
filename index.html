@@ -134,10 +134,12 @@
     .btn.ghost { background: transparent; color: white; border-color: rgba(255,255,255,.35); }
     .btn.danger { color: var(--red); border-color: #ecc5bf; background: #fff8f7; }
     .btn.small { padding: 7px 10px; font-size: .86rem; border-radius: 9px; }
+    #deleteTeam { display: none; }
+    body.editing #deleteTeam { display: inline-block; }
 
     .switcher {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 8px;
       margin: 18px 0;
       padding: 6px;
@@ -160,6 +162,12 @@
       color: white;
       background: linear-gradient(135deg, #080b10, #323b47);
       box-shadow: 0 5px 12px rgba(23, 28, 36, .24);
+    }
+
+    .switcher .add-team-button {
+      border: 1px dashed var(--aqua-2);
+      color: var(--navy);
+      background: rgba(238,242,245,.72);
     }
 
     .summary {
@@ -539,10 +547,7 @@
       </div>
     </section>
 
-    <nav class="switcher" aria-label="Batting order">
-      <button type="button" data-team="service" aria-selected="true">Service Batting Order</button>
-      <button type="button" data-team="maintenance" aria-selected="false">Maintenance Batting Order</button>
-    </nav>
+    <nav class="switcher" id="teamSwitcher" aria-label="Batting orders"></nav>
 
     <section class="summary" id="summary"></section>
     <div id="warning"></div>
@@ -554,8 +559,10 @@
           <p>Technicians automatically rank by weighted score.</p>
         </div>
         <div class="panel-actions">
+          <button class="btn soft small" id="renameTeam">Rename Team</button>
+          <button class="btn danger small" id="deleteTeam">Delete Team</button>
           <button class="btn soft small" id="toggleSettings">Targets &amp; Weights</button>
-          <button class="btn small" id="resetData">Reset Demo</button>
+          <button class="btn small" id="resetData">Reset Team</button>
         </div>
       </header>
       <div class="settings" id="settings"></div>
@@ -591,7 +598,7 @@
 
   <aside class="customizer" id="customizer" aria-label="Market settings" hidden>
     <div class="customizer-head">
-      <div><h2>Market settings</h2><p>Change the logo, colors, team names, and summary labels.</p></div>
+      <div><h2>Market settings</h2><p>Change the logo, colors, and summary labels.</p></div>
       <button class="customizer-close" id="closeCustomizer" type="button" aria-label="Close market settings">×</button>
     </div>
     <div class="customizer-body">
@@ -620,8 +627,6 @@
       <section class="customizer-section">
         <h3>Display labels</h3>
         <div class="custom-grid">
-          <div class="custom-field"><label for="serviceLabel">Service board name</label><input id="serviceLabel" type="text" maxlength="60"></div>
-          <div class="custom-field"><label for="maintenanceLabel">Maintenance board name</label><input id="maintenanceLabel" type="text" maxlength="60"></div>
           <div class="custom-field"><label for="topLabel">Top performer label</label><input id="topLabel" type="text" maxlength="60"></div>
           <div class="custom-field"><label for="averageLabel">Team average label</label><input id="averageLabel" type="text" maxlength="60"></div>
           <div class="custom-field"><label for="windowLabel">Performance window label</label><input id="windowLabel" type="text" maxlength="60"></div>
@@ -728,9 +733,22 @@
     ];
 
     const defaults = {
-      activeTeam: "service",
+      schemaVersion: 3,
+      activeTeam: "selling",
+      teamOrder: ["selling", "service", "maintenance", "comfort-advisor"],
       windowDays: 14,
       teams: {
+        selling: {
+          label: "Selling Tech",
+          metrics: [
+            { name: metricNames[0], target: 0.25, weight: 0.20, type: "percent" },
+            { name: metricNames[1], target: 0.35, weight: 0.30, type: "percent" },
+            { name: metricNames[2], target: 950, weight: 0.10, type: "currency" },
+            { name: metricNames[3], target: 1, weight: 0.20, type: "number" },
+            { name: metricNames[4], target: 2.5, weight: 0.20, type: "decimal" }
+          ],
+          technicians: []
+        },
         service: {
           label: "Service",
           metrics: [
@@ -766,6 +784,17 @@
             ["Flash", .31, .08, 495, 2, 1.9],
             ["Mega Mind", .26, .14, 560, 1, 1.7]
           ].map(([name, ...actuals]) => ({ id: makeId(), name, actuals }))
+        },
+        "comfort-advisor": {
+          label: "Comfort Advisor",
+          metrics: [
+            { name: "Sales Close Rate", target: 0.45, weight: 0.30, type: "percent" },
+            { name: "Average Sale", target: 12500, weight: 0.25, type: "currency" },
+            { name: "Financing Approval Rate", target: 0.70, weight: 0.15, type: "percent" },
+            { name: "Gross Margin", target: 0.45, weight: 0.20, type: "percent" },
+            { name: "5-Star Google Reviews", target: 1, weight: 0.10, type: "number" }
+          ],
+          technicians: []
         }
       }
     };
@@ -794,6 +823,34 @@
 
     function normalizeState(data) {
       if (!data || !data.teams) return clone(defaults);
+      if (!data.schemaVersion) {
+        data.teams.selling ||= clone(defaults.teams.selling);
+        data.teams["comfort-advisor"] ||= clone(defaults.teams["comfort-advisor"]);
+        data.teamOrder = ["selling", "service", "maintenance", "comfort-advisor"]
+          .filter(id => data.teams[id]);
+        data.schemaVersion = 2;
+      }
+      if (Number(data.schemaVersion) < 3) {
+        Object.keys(data.teams).forEach(id => {
+          if (id === "selling" || id === "comfort-advisor" || !["service", "maintenance"].includes(id)) {
+            data.teams[id].metrics = metricsWithFiveExamples(data.teams[id].metrics);
+          }
+        });
+        data.schemaVersion = 3;
+      }
+      const teamIds = Object.keys(data.teams);
+      if (!teamIds.length) return clone(defaults);
+      const requestedOrder = Array.isArray(data.teamOrder) ? data.teamOrder : teamIds;
+      data.teamOrder = [...new Set([...requestedOrder.filter(id => data.teams[id]), ...teamIds])];
+      data.teamOrder.forEach(id => {
+        const current = data.teams[id];
+        current.label = String(current.label || "Untitled Team").trim() || "Untitled Team";
+        current.metrics = Array.isArray(current.metrics) && current.metrics.length
+          ? current.metrics
+          : clone(defaults.teams.service.metrics);
+        current.technicians = Array.isArray(current.technicians) ? current.technicians : [];
+      });
+      if (!data.teams[data.activeTeam]) data.activeTeam = data.teamOrder[0];
       if (!Number(data.windowDays)) {
         const oldDays = Number(String(data.window || "").match(/\d+/)?.[0]);
         data.windowDays = oldDays || 14;
@@ -816,6 +873,13 @@
     }
 
     function team() { return state.teams[state.activeTeam]; }
+
+    function metricsWithFiveExamples(metrics) {
+      const filled = clone(Array.isArray(metrics) ? metrics : []);
+      const examples = defaults.teams.service.metrics;
+      while (filled.length < 5) filled.push(clone(examples[filled.length] || examples[examples.length - 1]));
+      return filled;
+    }
 
     function scoreTech(tech) {
       const metrics = team().metrics;
@@ -866,12 +930,18 @@
         .sort((a, b) => b.result.score - a.result.score || a.name.localeCompare(b.name));
     }
 
+    function renderTeamSwitcher() {
+      document.getElementById("teamSwitcher").innerHTML = state.teamOrder.map(id => `
+        <button type="button" data-team="${escapeAttr(id)}" aria-selected="${id === state.activeTeam}">
+          ${escapeHtml(state.teams[id].label)}
+        </button>`).join("") + `
+        <button type="button" class="add-team-button" id="addTeam">+ Add Team</button>`;
+    }
+
     function render() {
-      document.querySelectorAll("[data-team]").forEach(button => {
-        button.setAttribute("aria-selected", button.dataset.team === state.activeTeam ? "true" : "false");
-        button.textContent = `${state.teams[button.dataset.team].label} Batting Order`;
-      });
+      renderTeamSwitcher();
       document.getElementById("panelTitle").textContent = `${team().label} Leaderboard`;
+      document.getElementById("deleteTeam").disabled = state.teamOrder.length === 1;
       renderSummary();
       renderWarning();
       renderSettings();
@@ -985,7 +1055,24 @@
       notify.timer = setTimeout(() => toast.classList.remove("show"), 2400);
     }
 
-    document.querySelector(".switcher").addEventListener("click", event => {
+    document.getElementById("teamSwitcher").addEventListener("click", event => {
+      if (event.target.closest("#addTeam")) {
+        const label = prompt("New team name");
+        if (!label?.trim()) return;
+        const id = `team-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+        state.teams[id] = {
+          label: label.trim(),
+          metrics: metricsWithFiveExamples(team().metrics),
+          technicians: []
+        };
+        state.teamOrder.push(id);
+        state.activeTeam = id;
+        openTech = null;
+        settingsOpen = false;
+        save(); render();
+        notify(`${state.teams[id].label} batting order added.`);
+        return;
+      }
       const button = event.target.closest("[data-team]");
       if (!button) return;
       state.activeTeam = button.dataset.team;
@@ -993,6 +1080,33 @@
       settingsOpen = false;
       save();
       render();
+    });
+
+    document.getElementById("renameTeam").addEventListener("click", () => {
+      const label = prompt("Team name", team().label);
+      if (!label?.trim()) return;
+      team().label = label.trim();
+      save(); render();
+      notify("Team renamed.");
+    });
+
+    document.getElementById("deleteTeam").addEventListener("click", () => {
+      if (!editing) return;
+      if (state.teamOrder.length === 1) {
+        alert("Keep at least one batting order.");
+        return;
+      }
+      const id = state.activeTeam;
+      const label = team().label;
+      if (!confirm(`Delete the ${label} batting order and all of its technician data?`)) return;
+      const index = state.teamOrder.indexOf(id);
+      delete state.teams[id];
+      state.teamOrder = state.teamOrder.filter(teamId => teamId !== id);
+      state.activeTeam = state.teamOrder[Math.min(index, state.teamOrder.length - 1)];
+      openTech = null;
+      settingsOpen = false;
+      save(); render();
+      notify(`${label} batting order deleted.`);
     });
 
     document.getElementById("leaderboard").addEventListener("click", event => {
@@ -1106,9 +1220,17 @@
     }
 
     function destinationFrom(value, sheetName) {
-      const label = `${value || ""} ${sheetName || ""}`.toLowerCase();
-      if (label.includes("maint")) return "maintenance";
-      if (label.includes("service")) return "service";
+      const label = normalizedHeader(`${value || ""} ${sheetName || ""}`);
+      const exactMatch = state.teamOrder.find(id => {
+        const idText = normalizedHeader(id);
+        const teamText = normalizedHeader(state.teams[id].label);
+        return label.includes(teamText) || label.includes(idText);
+      });
+      if (exactMatch) return exactMatch;
+      if (label.includes("comfort") || label.includes("advisor")) return state.teams["comfort-advisor"] ? "comfort-advisor" : state.activeTeam;
+      if (label.includes("selling")) return state.teams.selling ? "selling" : state.activeTeam;
+      if (label.includes("maint")) return state.teams.maintenance ? "maintenance" : state.activeTeam;
+      if (label.includes("service")) return state.teams.service ? "service" : state.activeTeam;
       return state.activeTeam;
     }
 
@@ -1162,7 +1284,8 @@
 
     async function importTechFile(file) {
       const extension = file.name.split(".").pop().toLowerCase();
-      const counts = { service: 0, maintenance: 0, skipped: 0 };
+      const counts = Object.fromEntries(state.teamOrder.map(id => [id, 0]));
+      counts.skipped = 0;
       if (extension === "csv") {
         const text = await file.text();
         const rows = text.split(/\r?\n/).map(line => {
@@ -1189,9 +1312,10 @@
           importRows(rows, sheetName, counts);
         });
       }
-      if (!counts.service && !counts.maintenance) throw new Error("No new technician names were found in that file.");
+      const importedTotal = state.teamOrder.reduce((sum, id) => sum + (counts[id] || 0), 0);
+      if (!importedTotal) throw new Error("No new technician names were found in that file.");
       save(); render();
-      notify(`Imported ${counts.service + counts.maintenance} technicians.`);
+      notify(`Imported ${importedTotal} technicians.`);
     }
 
     document.getElementById("importTechs").addEventListener("click", () => {
@@ -1211,9 +1335,12 @@
     });
 
     document.getElementById("resetData").addEventListener("click", () => {
-      if (!confirm(`Reset the ${team().label} batting order to the original spreadsheet example?`)) return;
+      if (!confirm(`Reset the ${team().label} batting order to its starting targets, weights, and technician list?`)) return;
       const active = state.activeTeam;
-      state.teams[active] = clone(defaults.teams[active]);
+      const label = team().label;
+      state.teams[active] = defaults.teams[active]
+        ? clone(defaults.teams[active])
+        : { label, metrics: clone(defaults.teams.service.metrics), technicians: [] };
       state.activeTeam = active;
       openTech = null;
       save(); render();
@@ -1288,8 +1415,6 @@
       paletteInputs.forEach(input => {
         input.value = customization.palette?.[input.dataset.colorVar] || DEFAULT_CUSTOMIZATION.palette[input.dataset.colorVar];
       });
-      document.getElementById("serviceLabel").value = state.teams.service.label;
-      document.getElementById("maintenanceLabel").value = state.teams.maintenance.label;
       document.getElementById("topLabel").value = customization.topLabel;
       document.getElementById("averageLabel").value = customization.averageLabel;
       document.getElementById("windowLabel").value = customization.windowLabel;
@@ -1322,17 +1447,13 @@
     }
 
     function applyMarketSettings() {
-      const serviceLabel = document.getElementById("serviceLabel").value.trim();
-      const maintenanceLabel = document.getElementById("maintenanceLabel").value.trim();
       const topLabel = document.getElementById("topLabel").value.trim();
       const averageLabel = document.getElementById("averageLabel").value.trim();
       const windowLabel = document.getElementById("windowLabel").value.trim();
-      if (!serviceLabel || !maintenanceLabel || !topLabel || !averageLabel || !windowLabel) {
+      if (!topLabel || !averageLabel || !windowLabel) {
         alert("Every display label needs a value.");
         return;
       }
-      state.teams.service.label = serviceLabel;
-      state.teams.maintenance.label = maintenanceLabel;
       customization.topLabel = topLabel;
       customization.averageLabel = averageLabel;
       customization.windowLabel = windowLabel;
@@ -1393,8 +1514,6 @@
     function restoreCustomization() {
       if (!confirm("Restore the original ARMOR logo, colors, labels, and wording? Technician results will remain.")) return;
       customization = clone(DEFAULT_CUSTOMIZATION);
-      state.teams.service.label = "Service";
-      state.teams.maintenance.label = "Maintenance";
       applyCopy(originalCopy);
       applyPalette();
       renderLogo();
@@ -1421,8 +1540,6 @@
     document.getElementById("downloadCustomized").addEventListener("click", downloadCustomizedFile);
     document.getElementById("restoreCustomization").addEventListener("click", restoreCustomization);
     document.getElementById("resetLabels").addEventListener("click", () => {
-      document.getElementById("serviceLabel").value = "Service";
-      document.getElementById("maintenanceLabel").value = "Maintenance";
       document.getElementById("topLabel").value = DEFAULT_CUSTOMIZATION.topLabel;
       document.getElementById("averageLabel").value = DEFAULT_CUSTOMIZATION.averageLabel;
       document.getElementById("windowLabel").value = DEFAULT_CUSTOMIZATION.windowLabel;
